@@ -1,15 +1,29 @@
 const getParameter = require('js2args');
+const glob = require('glob');
 
 // get the tool names
-const toolName = process.env.RUN_TOOL || 'foobar';
+const toolName = process.env.RUN_TOOL || 'studio';
 
-// load the parameters
-params = getParameter();
 
 // switch the toolName
-if (toolName === 'foobar') {
-   console.log('You are running the template directly. Please change the foobar function.')
-   console.log(params) 
+if (toolName === 'studio') {
+    // load the parameters
+    const params = getParameter();
+
+    // copy the recognized datasets to the application
+    if (!params.dir) {
+        params.dir = '/in/*'
+    }
+    const files = glob.sync(params.dir);
+    files.forEach(file => console.log(file));
+
+    // compile application
+
+    // use gulp to package a single file
+
+    // copy to out folder
+
+
 } else {
     console.error(`The toolname ${toolName} is not recognized. Did you forget to implement it?`)
 }
