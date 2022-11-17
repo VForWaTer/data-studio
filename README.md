@@ -1,4 +1,6 @@
-# tool_template_node
+# Data Studio template
+
+**This template is work in progress**
 
 This is the template for a generic containerized NodeJS tool. This template can be used to generate new Github repositories from it.
 
