@@ -1,11 +1,13 @@
 // main Data object
 export interface Data {
-    datasets: Dataset[]
+    datasets: Dataset[] 
 }
+
+export type DATASET_TYPE = 'ForceGraph' | 'Array'; 
 
 // basic Dataset
 export interface Dataset {
-    type: 'ForceGraph' | 'Array'
+    type: DATASET_TYPE
     title: string,
 }
 
