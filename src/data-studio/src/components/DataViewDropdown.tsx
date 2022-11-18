@@ -1,6 +1,6 @@
 import { Button, ButtonProps, Menu, MenuItem } from "@mui/material";
 import { ExpandMore, ExpandLess } from '@mui/icons-material';
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { DATASET_TYPE } from "../Data.model";
 import { useDatasets } from "../datasets";
 import { useViews } from "../views";
