@@ -18,13 +18,17 @@ export interface GraphDataset extends Dataset {
 
 // Graph Data
 export interface GraphData {
-    nodes: {
-        id: string | number
-        [key: string]: any
-    }[],
-    links: {
-        source: string | number
-        target: string | number
-        [key: string]: any
-    }[]
+    nodes: ForceNode[],
+    links:ForceLink[]
+}
+
+export interface ForceNode {
+    id: string | number
+    [key: string]: any
+}
+
+export interface ForceLink {
+    source: string | number
+    target: string | number
+    [key: string]: any
 }
