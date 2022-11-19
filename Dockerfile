@@ -11,6 +11,8 @@ COPY ./src /src
 WORKDIR /src
 RUN npm install js2args@v0.3.0
 RUN npm install glob@8.0.3
+RUN npm install shelljs@0.8.5
+RUN npm install fs-extra@10.1.0
 
 # install the dependencies of the data studio application
 WORKDIR /src/data-studio
