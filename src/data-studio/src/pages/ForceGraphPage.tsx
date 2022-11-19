@@ -48,6 +48,16 @@ const ForceGraphPage: React.FC = () => {
         }
     },[graphData])
 
+    // populate the filter options whenever linksOptions change
+    useEffect(() => {
+        const filt: LinkFilter = {}
+        linkOptions.forEach(opt => {
+            const vals = links.map(l => l[opt])
+            filt[opt] = {min: Math.min(...vals), max: Math.max(...vals), value: [Math.min(...vals), Math.max(...vals)]}
+        })
+        setFilter(filt)
+    }, [linkOptions, links])
+
     // derive linkColorOptions
     useEffect(() => {
         // use only the fist occurence
@@ -55,7 +65,6 @@ const ForceGraphPage: React.FC = () => {
         if (firstLink) {
             const opts = Object.keys(firstLink).filter(k => !['source', 'target', 'index', 'color'].includes(k)).filter(l => !l.startsWith('_'))
             setLinkOptions(opts)
-            
         }
 
         // do the same for the nodes
@@ -65,16 +74,6 @@ const ForceGraphPage: React.FC = () => {
             setNodeOptions(opts)
         }
     }, [graphData])
-
-    // populate the filter options whenever linksOptions change
-    useEffect(() => {
-        const filt: LinkFilter = {}
-        linkOptions.forEach(opt => {
-            const vals = links.map(l => l[opt])
-            filt[opt] = {min: Math.min(...vals), max: Math.max(...vals), value: [Math.min(...vals), Math.max(...vals)]}
-        })
-        setFilter(filt)
-    }, [linkOptions])
 
     // update the slider when a user
     const updateFilter = (key: string, value: number[]) => {
@@ -140,7 +139,6 @@ const ForceGraphPage: React.FC = () => {
         })
     })
     
-
     // header
     const Header = (
         <Box sx={{flexGrow: 1}}>
@@ -161,6 +159,7 @@ const ForceGraphPage: React.FC = () => {
             <h1>No Graph data available</h1>
         </>
     }
+
     return <>
         { Header }
         <Box sx={{flexGrow: 1}}>
@@ -185,12 +184,11 @@ const ForceGraphPage: React.FC = () => {
 
                     <Box>
                         <ListSubheader>Filter</ListSubheader>
-                        { linkOptions.map(opt => {
+                        { Object.keys(filter).length === 0 ? null : linkOptions.map(opt => {
                             return (
-                                <FormControl variant="standard" fullWidth sx={{m: 1, zIndex: 10}}>
+                                <FormControl key={opt} variant="standard" fullWidth sx={{m: 1, zIndex: 10}}>
                                     <InputLabel id={`filt-${opt}`} sx={{mt: 1}}>Filter: {opt}</InputLabel>
-                                    <Slider 
-                                        key={opt} 
+                                    <Slider  
                                         sx={{ml: 3, width: '80%'}} 
                                         value={filter[opt].value} 
                                         max={filter[opt].max} 
