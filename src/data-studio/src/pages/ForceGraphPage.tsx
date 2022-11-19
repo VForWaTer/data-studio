@@ -3,17 +3,22 @@ import { AppBar, Box, Divider, FormControl, FormControlLabel,  InputLabel, List,
 import Grid from '@mui/material/Unstable_Grid2';
 import { ForceGraph2D } from "react-force-graph";
 import { scale } from 'chroma-js';
+import cloneDeep from 'lodash.clonedeep';
 
 import DataViewDropdown from "../components/DataViewDropdown";
 import { ForceLink, ForceNode, GraphDataset } from "../Data.model";
 import { useDatasets } from "../datasets";
 
+interface LinkFilter {
+    [key: string]: {min: number, max: number, value: number[]}
+}
 
 const ForceGraphPage: React.FC = () => {
     // component state
     const [graphData, setGraphData] = useState<GraphDataset>()
     const [nodes, setNodes] = useState<ForceNode[]>([])
     const [links, setLinks] = useState<ForceLink[]>([])
+    const [filteredLinks, setFilteredLinks] = useState<ForceLink[]>([])
 
 
     // states to control the graph itself
@@ -25,7 +30,7 @@ const ForceGraphPage: React.FC = () => {
     // visuals of the graph
     const [linkColor, setLinkColor] = useState<string | null>(null)
     const [nodeSize, setNodeSize] = useState<string | null>(null)
-    const [filter, setFilter] = useState<{[key: string]: number[]}>({})
+    const [filter, setFilter] = useState<LinkFilter>({})
 
     // load graph data
     const { forceGraphs } = useDatasets()
@@ -60,6 +65,33 @@ const ForceGraphPage: React.FC = () => {
             setNodeOptions(opts)
         }
     }, [graphData])
+
+    // populate the filter options whenever linksOptions change
+    useEffect(() => {
+        const filt: LinkFilter = {}
+        linkOptions.forEach(opt => {
+            const vals = links.map(l => l[opt])
+            filt[opt] = {min: Math.min(...vals), max: Math.max(...vals), value: [Math.min(...vals), Math.max(...vals)]}
+        })
+        setFilter(filt)
+    }, [linkOptions])
+
+    // update the slider when a user
+    const updateFilter = (key: string, value: number[]) => {
+        const filt = cloneDeep(filter)
+        filt[key] = {...filt[key], value: value}
+        setFilter(filt)
+    }
+    
+    // update the filtered Links whenever the filter changes
+    useEffect(() => {
+        const filtLinks = links.filter(link => {
+            return Object.entries(filter).every(([key, filt]) => {
+                return link[key] >= filt.value[0] && link[key] <= filt.value[1]
+            })
+        })
+        setFilteredLinks(filtLinks)
+    }, [links, filter])
 
     // whenever the link options change, reset the auto options
     useEffect(() => {
@@ -155,9 +187,17 @@ const ForceGraphPage: React.FC = () => {
                         <ListSubheader>Filter</ListSubheader>
                         { linkOptions.map(opt => {
                             return (
-                                <FormControl variant="standard" fullWidth sx={{m: 1}}>
-                                    <InputLabel id={`filt-${opt}`}>Filter: {opt}</InputLabel>
-                                    <Slider key={opt} sx={{ml: 3, width: '80%'}} value={[0, 100]} max={120} valueLabelDisplay="auto" />
+                                <FormControl variant="standard" fullWidth sx={{m: 1, zIndex: 10}}>
+                                    <InputLabel id={`filt-${opt}`} sx={{mt: 1}}>Filter: {opt}</InputLabel>
+                                    <Slider 
+                                        key={opt} 
+                                        sx={{ml: 3, width: '80%'}} 
+                                        value={filter[opt].value} 
+                                        max={filter[opt].max} 
+                                        min={filter[opt].min}
+                                        onChange={(e, vals) => updateFilter(opt, vals as number[])}
+                                        valueLabelDisplay="auto"
+                                    />
                                 </FormControl>
                                 
                             )
@@ -218,7 +258,7 @@ const ForceGraphPage: React.FC = () => {
                     linkDirectionalArrowLength={directed ? 3.5 : 0}
                     linkDirectionalArrowRelPos={1}
 
-                    graphData={{nodes, links}}
+                    graphData={{nodes, links: filteredLinks}}
                     
                 />
                 </Paper>
