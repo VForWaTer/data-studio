@@ -14,7 +14,7 @@ const App: React.FC = () => {
     
     useEffect(() => {
         setDatasets(data.datasets)
-    })
+    }, [])
 
     return (
         <ViewsProvider>
