@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { AppBar, Box, Divider, FormControl, FormControlLabel,  InputLabel, List, ListItem, ListSubheader, MenuItem, Paper, Select, SelectChangeEvent, Slider, Switch, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, Divider, FormControl, FormControlLabel,  IconButton,  InputLabel, List, ListItem, ListSubheader, MenuItem, Paper, Select, SelectChangeEvent, Slider, Switch, Toolbar, Typography } from "@mui/material";
 import Grid from '@mui/material/Unstable_Grid2';
+import { Upload } from '@mui/icons-material';
 import { ForceGraph2D } from "react-force-graph";
 import { scale } from 'chroma-js';
 import cloneDeep from 'lodash.clonedeep';
 
 import DataViewDropdown from "../components/DataViewDropdown";
-import { ForceLink, ForceNode, GraphDataset } from "../Data.model";
+import { ForceLink, ForceNode, GraphDataset, JSONDataset, RecordDataset } from "../Data.model";
 import { useDatasets } from "../datasets";
 
 interface LinkFilter {
@@ -33,18 +34,18 @@ const ForceGraphPage: React.FC = () => {
     const [filter, setFilter] = useState<LinkFilter>({})
 
     // load graph data
-    const { forceGraphs } = useDatasets()
+    const { forceGraphs, appendDatasets } = useDatasets()
 
     // set graph data
     useEffect(() => {
         if (forceGraphs.length > 0) {
-            setGraphData(forceGraphs[0])
+            setGraphData(cloneDeep(forceGraphs[0]))
         }
     }, [forceGraphs])
     useEffect(() => {
         if (graphData) {
-            setNodes([...graphData.data.nodes])
-            setLinks([...graphData.data.links])
+            setNodes(cloneDeep(graphData.data.nodes))
+            setLinks(cloneDeep(graphData.data.links))
         }
     },[graphData])
 
@@ -118,6 +119,7 @@ const ForceGraphPage: React.FC = () => {
     // add colors to the links
     // TODO: the scale can be turn into state as well
     useEffect(() => {
+        // copy the filtered links
         // get min and max
         if (linkColor) {
             const vals = links.map(l => l[linkColor] as number)
@@ -138,6 +140,19 @@ const ForceGraphPage: React.FC = () => {
             n.value = nodeSize ? n[nodeSize] : 2
         })
     })
+
+    // add the current graph to the dataset context
+    const addToContext = () => {
+        // add as generic json
+        const jsonSet = {title: graphData?.title, type: 'JSON', data: { nodes, links: cloneDeep(filteredLinks) }} as JSONDataset
+        
+        // also add as records
+        const nodesRecord = {title: `Nodes of ${graphData?.title}`, type: 'Record', data: cloneDeep(nodes)} as RecordDataset
+        const linksRecord = {title: `Links of ${graphData?.title}`, type: 'Record', data: cloneDeep(filteredLinks)} as RecordDataset
+
+        // append stuff
+        appendDatasets([jsonSet, nodesRecord, linksRecord])
+    }
     
     // header
     const Header = (
@@ -147,11 +162,12 @@ const ForceGraphPage: React.FC = () => {
                     <Typography variant="h6" component="div" sx={{flexGrow: 1}}>
                         Force Directed Graph - { graphData ? graphData.title : 'no data' }
                     </Typography>
+                    <IconButton color="inherit" onClick={() => addToContext()}><Upload /></IconButton>
                     <DataViewDropdown />
                 </Toolbar>
             </AppBar>
         </Box>
-    )
+    );
     
     if (!graphData) {
         return <>
