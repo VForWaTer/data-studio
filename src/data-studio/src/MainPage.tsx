@@ -4,6 +4,7 @@ import React from 'react';
 import { useViews } from './views';
 import JSONDatasetPage from './pages/JSONDatasetPage';
 import TableViewPage from './pages/TableViewPage';
+import ArrayViewPage from './pages/ArrayViewPage';
 
 
 const MainPage: React.FC = () => {
@@ -16,6 +17,7 @@ const MainPage: React.FC = () => {
       { current === 'ForceGraph' ? <ForceGraphPage /> : null }
       { current === 'JSON' ? <JSONDatasetPage /> : null }
       { current === 'Record' ? <TableViewPage /> : null}
+      { current === 'Array' ? <ArrayViewPage /> : null }
     
     </Box>
   );
