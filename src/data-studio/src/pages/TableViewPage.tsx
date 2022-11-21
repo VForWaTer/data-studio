@@ -5,7 +5,6 @@ import { DataGrid, GridColDef } from '@mui/x-data-grid';
 import DataViewDropdown from "../components/DataViewDropdown"
 import { RecordDataset } from "../Data.model"
 import { useDatasets } from "../datasets"
-import { idID } from "@mui/material/locale";
 
 const TableView: React.FC = () => {
     // get the record datatypes from the context
