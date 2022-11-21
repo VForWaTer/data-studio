@@ -1,6 +1,6 @@
 import cloneDeep from "lodash.clonedeep"
 import { createContext, useContext, useEffect, useState } from "react"
-import { Dataset, DATASET_TYPE, GraphDataset, JSONDataset, RecordDataset } from "./Data.model"
+import { ArrayDataset, Dataset, DATASET_TYPE, GraphDataset, JSONDataset, RecordDataset } from "./Data.model"
 
 interface DatasetsState {
     datasets: Dataset[],
@@ -8,6 +8,7 @@ interface DatasetsState {
     forceGraphs: GraphDataset[],
     genericJson: JSONDataset[],
     records: RecordDataset[],
+    arrays: ArrayDataset[],
     setDatasets: (datasets: Dataset[]) => void,
     appendDatasets: (datasets: Dataset[]) => void
 }
@@ -18,6 +19,7 @@ const initialState: DatasetsState = {
     forceGraphs: [],
     genericJson: [],
     records: [],
+    arrays: [],
     setDatasets: (datasets: Dataset[]) => {},
     appendDatasets: (datasets: Dataset[]) => {}
 }
@@ -33,6 +35,7 @@ export const DatasetProvider: React.FC<React.PropsWithChildren> = ({ children })
     const [forceGraphs, setForceGraphs] = useState<GraphDataset[]>([])
     const [records, setRecords] = useState<RecordDataset[]>([])
     const [genericJson, setGenericJson] = useState<JSONDataset[]>([])
+    const [arrays, setArrays] = useState<ArrayDataset[]>([])
 
     const setDatasets = (newDatasets: Dataset[]) => {
         replaceDatasets(cloneDeep(newDatasets))
@@ -68,6 +71,10 @@ export const DatasetProvider: React.FC<React.PropsWithChildren> = ({ children })
         // filter records
         const newRecords: RecordDataset[] = datasets.filter(d => d.type === 'Record').map(d => d as RecordDataset)
         setRecords(newRecords)
+
+        // filter Arrays
+        const newArrays: ArrayDataset[] = datasets.filter(d => d.type === 'Array').map(d => d as ArrayDataset)
+        setArrays(newArrays)
     }, [datasets])
 
     // create the current context values
@@ -77,6 +84,7 @@ export const DatasetProvider: React.FC<React.PropsWithChildren> = ({ children })
         forceGraphs,
         genericJson,
         records,
+        arrays,
         setDatasets,
         appendDatasets
     }
