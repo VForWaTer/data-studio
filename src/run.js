@@ -1,5 +1,6 @@
 const getParameter = require('js2args');
 const glob = require('glob');
+const path = require('path');
 const shell = require('shelljs');
 const fs = require('fs-extra');
 
@@ -16,9 +17,24 @@ if (toolName === 'studio') {
     if (!params.dir) {
         params.dir = '/in/*'
     }
+    // get all file names in the input dir
     const files = glob.sync(params.dir);
+
+    // container for the final data-file
+    const data = {}
+
     // # TODO: build and copy the input file 
-    files.forEach(file => console.log(file));
+    files.forEach(file => {
+        console.log(file);
+        return;
+        // skip parameters.json if we are scanning default /in/*
+        if (file.endsWith('parameters.json')) return
+
+        switch (path.extname(file)) {
+            case '.dat':
+                data[path.basename(file, '.dat')]
+        }
+    });
 
     // compile application
     shell.exec('cd src/data-studio && npm run build')
