@@ -20,6 +20,7 @@ const ForceGraphPage: React.FC = () => {
     const [nodes, setNodes] = useState<ForceNode[]>([])
     const [links, setLinks] = useState<ForceLink[]>([])
     const [filteredLinks, setFilteredLinks] = useState<ForceLink[]>([])
+    const [linkValue, setLinkValue] = useState<string>('NONE')
 
 
     // states to control the graph itself
@@ -46,6 +47,15 @@ const ForceGraphPage: React.FC = () => {
         if (graphData) {
             setNodes(cloneDeep(graphData.data.nodes))
             setLinks(cloneDeep(graphData.data.links))
+
+            // set default link value
+            const link = graphData.data.links[0]
+            if (link.value) {
+                setLinkValue('value')
+            } else {
+                const keys = Object.keys(link).filter(k => !['source', 'target'].includes(k))
+                setLinkValue(keys.length > 0 ? keys[0] : 'NONE')
+            }
         }
     },[graphData])
 
@@ -93,6 +103,17 @@ const ForceGraphPage: React.FC = () => {
         setFilteredLinks(filtLinks)
     }, [links, filter])
 
+    // update the value property of the filteredLinks, when linkValue changes
+    useEffect(() => {
+        const filtLinks = filteredLinks.map(l => {
+            return {
+                ...l,
+                value: filter[linkValue] && l[linkValue] ? ((l[linkValue] - filter[linkValue].min) / (filter[linkValue].max - filter[linkValue].min)) * 10 : 1 
+        }
+        })
+        setFilteredLinks(filtLinks)
+    }, [linkValue])
+
     // whenever the link options change, reset the auto options
     useEffect(() => {
         if (linkColor && !linkOptions.includes(linkColor)) {
@@ -124,8 +145,8 @@ const ForceGraphPage: React.FC = () => {
         if (linkColor) {
             const vals = links.map(l => l[linkColor] as number)
             const colorScaler = scale(['red', 'yellow', 'blue']).domain([Math.min(...vals), Math.max(...vals)])
-            links.forEach((l, i) => {
-                l.color = colorScaler(i).hex()
+            links.forEach((l) => {
+                l.color = colorScaler(l[linkColor] as number).hex()
             })
         } else {
             links.forEach(l => {
@@ -195,6 +216,18 @@ const ForceGraphPage: React.FC = () => {
                                 </Select>
                             </FormControl>
                         </ListItem>
+
+                        <ListItem>
+                            <FormControl variant="standard" fullWidth>
+                                <InputLabel id="link-value-select">Select Edge value</InputLabel>
+                                <Select labelId="link-value-select" value={linkValue} onChange={e => setLinkValue(e.target.value)}>
+                                    <MenuItem value="NONE">Uniform edges</MenuItem>
+                                    { linkOptions.map(opt => <MenuItem key={opt} value={opt}>{opt}</MenuItem>) }
+                                </Select>
+                            </FormControl>
+
+                        </ListItem>
+
                         <Divider sx={{my: 1}}/>
                     </Box>
 
